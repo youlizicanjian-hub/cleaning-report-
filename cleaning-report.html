@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>清掃報告書</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+:root{--blue:#0F4C75;--blue2:#1B6CA8;--blue-light:#EFF6FF;--green:#10B981;--red:#EF4444;--amber:#F59E0B;--gray:#F0F4F8;--gray2:#F8FAFC;--border:#E2E8F0;--text:#1a1a2e;--text2:#555;--text3:#888;}
+body{font-family:'Noto Sans JP','Hiragino Sans',sans-serif;background:var(--gray);min-height:100vh;max-width:430px;margin:0 auto;}
+.header{background:linear-gradient(135deg,var(--blue),var(--blue2));padding:16px 20px 20px;color:white;position:sticky;top:0;z-index:100;box-shadow:0 4px 20px rgba(15,76,117,0.4);display:flex;align-items:center;}
+.header-icon{background:rgba(255,255,255,0.2);border-radius:12px;padding:6px 10px;font-size:22px;margin-right:10px;}
+.badge{margin-left:auto;background:rgba(255,255,255,0.2);border-radius:20px;padding:5px 14px;font-size:13px;font-weight:700;}
+.body{padding:14px 14px 100px;}
+.section{background:white;border-radius:18px;padding:16px;margin-bottom:14px;box-shadow:0 2px 12px rgba(0,0,0,0.05);}
+.section-title{font-size:12px;font-weight:800;color:var(--blue);letter-spacing:1px;margin-bottom:14px;}
+.row{margin-bottom:14px;}.row:last-child{margin-bottom:0;}
+.label{font-size:12px;font-weight:700;color:#444;margin-bottom:6px;}
+.hint{font-size:10px;color:var(--text3);margin-top:3px;line-height:1.5;}
+input[type=text],input[type=date],input[type=time],input[type=email],input[type=number],select,textarea{width:100%;border:1.5px solid var(--border);border-radius:12px;padding:11px 14px;font-size:15px;color:var(--text);outline:none;background:var(--gray2);font-family:inherit;box-sizing:border-box;}
+textarea{resize:none;line-height:1.6;}
+.chip-wrap{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;}
+.chip{padding:8px 14px;border-radius:20px;border:none;cursor:pointer;font-weight:700;font-size:13px;background:#F1F5F9;color:var(--text2);transition:all 0.15s;font-family:inherit;}
+.chip.active{background:var(--blue);color:white;box-shadow:0 4px 12px rgba(15,76,117,0.3);}
+.small-btn{background:var(--blue-light);color:var(--blue2);border:none;border-radius:10px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;}
+.add-room-btn{width:100%;padding:10px;border-radius:12px;border:2px dashed var(--blue2);background:var(--blue-light);color:var(--blue2);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:8px;}
+.room-card{display:flex;align-items:center;gap:12px;padding:14px;background:white;border-radius:14px;margin-bottom:8px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.05);border-left:4px solid var(--border);}
+.status-badge{border-radius:10px;padding:3px 10px;font-size:12px;font-weight:700;color:white;}
+.footer{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:white;padding:10px 14px 20px;box-shadow:0 -4px 20px rgba(0,0,0,0.1);}
+.primary-btn{width:100%;padding:15px;border-radius:16px;border:none;background:linear-gradient(135deg,var(--blue),var(--blue2));color:white;font-weight:800;font-size:16px;cursor:pointer;font-family:inherit;box-shadow:0 4px 16px rgba(15,76,117,0.4);}
+.back-btn{background:rgba(255,255,255,0.15);border:none;color:white;border-radius:10px;padding:8px 14px;font-size:13px;cursor:pointer;font-weight:700;font-family:inherit;}
+.photo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.photo-add{width:100%;aspect-ratio:1;border-radius:10px;border:2px dashed var(--blue2);background:var(--blue-light);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;color:var(--blue2);gap:2px;font-size:10px;font-weight:600;}
+.photo-wrap{position:relative;}
+.photo-wrap img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;}
+.photo-remove{position:absolute;top:3px;right:3px;background:rgba(0,0,0,0.6);border:none;color:white;border-radius:50%;width:20px;height:20px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;}
+.share-btn{border:none;border-radius:14px;padding:12px 8px;color:white;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12px;font-weight:800;font-family:inherit;box-shadow:0 4px 12px rgba(0,0,0,0.15);}
+.toast{position:fixed;top:90px;left:50%;transform:translateX(-50%);background:var(--blue);color:white;padding:12px 22px;border-radius:22px;font-size:14px;font-weight:700;z-index:9999;white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,0.25);pointer-events:none;max-width:90%;}
+.save-notice{background:#FFF7ED;border:1.5px solid #FED7AA;border-radius:12px;padding:10px 14px;font-size:11px;color:#92400E;margin-bottom:10px;line-height:1.6;}
+.photo-guide{background:var(--blue-light);border:1.5px solid #BFDBFE;border-radius:12px;padding:12px 14px;margin-top:10px;font-size:11px;color:var(--blue);line-height:1.8;}
+.photo-guide-title{font-weight:800;margin-bottom:4px;font-size:12px;}
+.check-item{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:10px;cursor:pointer;background:#F8FAFC;border:1.5px solid var(--border);transition:all 0.15s;margin-bottom:6px;}
+.check-item.checked{background:var(--blue-light);border-color:var(--blue2);}
+.check-box{width:18px;height:18px;border-radius:5px;border:2px solid #CBD5E1;background:white;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.check-box.checked{background:var(--blue2);border-color:var(--blue2);}
+.preview-card{background:white;border-radius:18px;padding:18px;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,0.05);}
+.preview-title{font-size:13px;font-weight:800;color:var(--blue);margin-bottom:12px;}
+.preview-row{display:flex;border-bottom:1px solid #F0F4F8;padding:8px 0;}
+.preview-label{font-size:12px;color:var(--text3);width:110px;flex-shrink:0;}
+.preview-val{font-size:13px;color:var(--text);font-weight:600;}
+.worker-fixed{display:inline-flex;align-items:center;gap:6px;background:var(--blue);color:white;border-radius:20px;padding:8px 14px;font-size:13px;font-weight:700;margin-right:8px;margin-bottom:8px;}
+.history-card{background:white;border-radius:14px;padding:14px;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,0.05);border-left:4px solid var(--blue2);}
+.gas-status{border-radius:12px;padding:10px 14px;font-size:12px;margin-bottom:10px;line-height:1.6;}
+.gas-ok{background:#D1FAE5;border:1.5px solid #10B981;color:#065F46;}
+.gas-err{background:#FEE2E2;border:1.5px solid #EF4444;color:#991B1B;}
+.gas-sending{background:#FEF3C7;border:1.5px solid #F59E0B;color:#92400E;}
+.tab-bar{display:flex;gap:4px;margin-bottom:14px;}
+.tab-btn{flex:1;padding:9px 4px;font-size:11px;border:1.5px solid var(--border);background:white;color:var(--text2);border-radius:12px;cursor:pointer;font-family:inherit;font-weight:700;text-align:center;}
+.tab-btn.active{background:var(--blue);color:white;border-color:var(--blue);}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const _AUTH_PASS="○○○○";
+(function(){
+  const stored=localStorage.getItem("cleaning_auth_v1");
+  if(stored===_AUTH_PASS)return;
+  document.body.innerHTML='<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#F0F4F8;font-family:Noto Sans JP,sans-serif"><div style="background:white;border-radius:20px;padding:32px 24px;width:320px;box-shadow:0 4px 20px rgba(0,0,0,0.1);text-align:center"><div style="font-size:48px;margin-bottom:12px">🔒</div><div style="font-size:18px;font-weight:800;color:#0F4C75;margin-bottom:6px">清掃報告書</div><div style="font-size:12px;color:#888;margin-bottom:24px">このアプリはパスワードで保護されています</div><input id="pw_input" type="password" placeholder="パスワードを入力" style="width:100%;border:1.5px solid #E2E8F0;border-radius:12px;padding:12px 14px;font-size:15px;outline:none;box-sizing:border-box;margin-bottom:12px;font-family:inherit"><button id="pw_btn" style="width:100%;padding:13px;border-radius:12px;border:none;background:linear-gradient(135deg,#0F4C75,#1B6CA8);color:white;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit">ログイン</button><div id="pw_err" style="color:#EF4444;font-size:12px;margin-top:10px;display:none">パスワードが違います</div></div></div>';
+  document.getElementById("pw_btn").onclick=function(){
+    const val=document.getElementById("pw_input").value;
+    if(val===_AUTH_PASS){localStorage.setItem("cleaning_auth_v1",_AUTH_PASS);location.reload();}
+    else{document.getElementById("pw_err").style.display="block";}
+  };
+  document.getElementById("pw_input").addEventListener("keydown",function(e){if(e.key==="Enter")document.getElementById("pw_btn").click();});
+  throw new Error("auth required");
+})();
+const GAS_URL="https://script.google.com/macros/s/AKfycbwudqoe8afkydaIF7_4pWkmrjEKVoSJYzJvJNMiaFuV73XEI3KQ_wIMtyjd15ypDuDEiQ/exec";
+const SERVICE_TYPES=["ハウスクリーニング","エアコン洗浄","ワックス剥離","強化洗浄","鏡研磨","床研磨","換気扇洗浄","窓清掃","排水管洗浄","消臭・除菌","浴室特殊洗浄","トイレ特殊洗浄","ガラス清掃","原状回復","その他"];
+const SITE_TYPES=["空室","在宅","共用部","その他"];
+const MADORI_OPTIONS=[{val:"1R",label:"1R（居室1）"},{val:"1K",label:"1K（居室1）"},{val:"1DK",label:"1DK（居室1＋DK）"},{val:"1LDK",label:"1LDK（居室1＋LDK）"},{val:"2K",label:"2K（居室2）"},{val:"2DK",label:"2DK（居室2＋DK）"},{val:"2LDK",label:"2LDK（居室2＋LDK）"},{val:"3K",label:"3K（居室3）"},{val:"3DK",label:"3DK（居室3＋DK）"},{val:"3LDK",label:"3LDK（居室3＋LDK）"},{val:"4LDK+",label:"4LDK以上（居室4＋LDK）"}];
+const MADORI_EX=["ロフト有り","メゾネット","テラスハウス"];
+const STATUSES=["完了","未完了","対象外"];
+const STATUS_CONFIG={"完了":{color:"#10B981",icon:"👍"},"未完了":{color:"#EF4444",icon:"❌"},"対象外":{color:"#94A3B8",icon:"—"}};
+const OVERALL_JUDGES=[{label:"OK/引渡し可",color:"#10B981"},{label:"再訪問",color:"#F59E0B"},{label:"⚠️ 異常あり（要報告）",color:"#EF4444"}];
+const ROOM_CHECKS=["天井/壁クロス","照明器具","窓・サッシ","床（フローリング/畳）","ドア","巾木","スイッチコンセント","エアコン","クローゼット","棚","カーテンレール","収納スペース"];
+const ALL_ROOMS=[
+  {id:"genkan",label:"玄関",icon:"🚪",checks:["天井/壁クロス","照明器具","床（フローリング/畳）","ドア","巾木","スイッチコンセント","鏡","下駄箱","玄関ドア","インターフォン"]},
+  {id:"corridor",label:"廊下・階段",icon:"🪜",checks:["天井/壁クロス","照明器具","床（フローリング/畳）","巾木","スイッチコンセント","手すり","窓・サッシ"]},
+  {id:"kitchen",label:"キッチン",icon:"🍳",checks:["天井/壁クロス","照明器具","床（フローリング/畳）","巾木","スイッチコンセント","シンク","コンロ","換気扇","壁タイル","収納","冷蔵庫周辺","排水口"]},
+  {id:"dining",label:"ダイニング",icon:"🪑",checks:["天井/壁クロス","照明器具","床（フローリング/畳）","ドア","巾木","スイッチコンセント","窓・サッシ"]},
+  {id:"living",label:"リビング",icon:"🛋️",checks:["天井/壁クロス","照明器具","床（フローリング/畳）","ドア","巾木","スイッチコンセント","窓・サッシ","カーテンレール"]},
+  {id:"bath",label:"浴室",icon:"🛁",checks:["浴槽","壁","床","天井","鏡","シャワー","排水口","換気扇","ドア","照明器具","タオルバー"]},
+  {id:"washroom",label:"洗面所",icon:"🪥",checks:["天井/壁クロス","照明器具","床（フローリング/畳）","巾木","スイッチコンセント","洗面台","鏡","収納","換気扇"]},
+  {id:"washroom2",label:"洗面所2",icon:"🪥",checks:["天井/壁クロス","照明器具","床（フローリング/畳）","巾木","スイッチコンセント","洗面台","鏡","収納","換気扇"]},
+  {id:"laundry",label:"洗濯室",icon:"🫧",checks:["防水バン","水栓","床","壁","棚","蛇口","換気扇","排水口"]},
+  {id:"toilet",label:"トイレ",icon:"🚽",checks:["天井/壁クロス","照明器具","床（フローリング/畳）","巾木","スイッチコンセント","便器","タンク","ペーパーホルダー","換気扇","ドア","棚"]},
+  {id:"toilet2",label:"トイレ2",icon:"🚽",checks:["天井/壁クロス","照明器具","床（フローリング/畳）","巾木","スイッチコンセント","便器","タンク","ペーパーホルダー","換気扇","ドア","棚"]},
+  {id:"room1",label:"居室1",icon:"🛏️",checks:[...ROOM_CHECKS]},
+  {id:"room2",label:"居室2",icon:"🛏️",checks:[...ROOM_CHECKS]},
+  {id:"room3",label:"居室3",icon:"🛏️",checks:[...ROOM_CHECKS]},
+  {id:"room4",label:"居室4",icon:"🛏️",checks:[...ROOM_CHECKS]},
+  {id:"sotomawari",label:"外回り・ベランダ",icon:"🌿",checks:["ベランダ","室外機","サッシガラス","網戸","窓","手すり","排水溝","床"]},
+];
+
+function getBaseRoomIds(madori){
+  const fixed=["genkan","corridor","kitchen","bath","washroom","laundry","toilet","sotomawari"];
+  let dynamic=[];
+  if(!madori||madori==="1R"||madori==="1K") dynamic=["room1"];
+  else if(madori==="1DK") dynamic=["dining","room1"];
+  else if(madori==="1LDK") dynamic=["living","dining","room1"];
+  else if(madori==="2K") dynamic=["room1","room2"];
+  else if(madori==="2DK") dynamic=["dining","room1","room2"];
+  else if(madori==="2LDK") dynamic=["living","dining","room1","room2"];
+  else if(madori==="3K") dynamic=["room1","room2","room3"];
+  else if(madori==="3DK") dynamic=["dining","room1","room2","room3"];
+  else if(madori==="3LDK") dynamic=["living","dining","room1","room2","room3"];
+  else if(madori==="4LDK+") dynamic=["living","dining","room1","room2","room3","room4"];
+  return[...fixed.slice(0,3),...dynamic,...fixed.slice(3)];
+}
+function getRoomInfo(id){return ALL_ROOMS.find(r=>r.id===id);}
+
+// LocalStorage
+const LS_KEY="cleaning_v4";
+const LS_HISTORY="cleaning_history_v1";
+function saveLS(form){
+  try{
+    const s={...form,rooms:form.rooms.map(r=>({...r,beforePhotos:[],afterPhotos:[]})),confirmPhotos:Array(10).fill(null),parkingReceipt:null,startReportPhotos:[]};
+    localStorage.setItem(LS_KEY,JSON.stringify(s));
+  }catch(e){}
+}
+function loadLS(){try{const s=localStorage.getItem(LS_KEY);return s?JSON.parse(s):null;}catch(e){return null;}}
+function clearLS(){localStorage.removeItem(LS_KEY);}
+function saveHistory(record){
+  try{
+    const h=getHistory();
+    h.unshift({...record,savedAt:new Date().toLocaleString("ja-JP")});
+    localStorage.setItem(LS_HISTORY,JSON.stringify(h.slice(0,30)));
+  }catch(e){}
+}
+function getHistory(){try{const h=localStorage.getItem(LS_HISTORY);return h?JSON.parse(h):[];}catch(e){return[];}}
+
+function newRoomData(id){return{roomId:id,status:"未完了",checks:[],memo:"",beforePhotos:[],afterPhotos:[],savedAt:null};}
+function initForm(madori=""){
+  const ids=getBaseRoomIds(madori);
+  return{dateStart:"",dateEnd:"",propertyName:"",address:"",services:[],serviceOther:"",startTime:"",endTime:"",extraWorkers:[],siteType:"",madori:"",madoriEx:[],hasKey:null,autolockNo:"",keyboxNo:"",hasParking:null,parkingFee:0,parkingReceipt:null,extraRooms:[],rooms:ids.map(newRoomData),overallJudge:"",reportMemo:"",confirmPhotos:Array(10).fill(null),inspectorName:"佐土原",clientEmail:"",startReportPhotos:[],startReportSent:false};
+}
+
+let S={form:null,page:"main",activeRoom:null,toast:null,toastTimer:null,gasStatus:null,sending:false,historyTab:"new"};
+
+function loadInitial(){
+  const saved=loadLS();
+  if(saved){
+    const ids=getBaseRoomIds(saved.madori||"");
+    const extraIds=saved.extraRooms||[];
+    const allIds=[...ids,...extraIds];
+    const merged=allIds.map(id=>(saved.rooms||[]).find(r=>r.roomId===id)||newRoomData(id));
+    return{...initForm(saved.madori||""),...saved,rooms:merged,confirmPhotos:Array(10).fill(null),parkingReceipt:null,startReportPhotos:[]};
+  }
+  return initForm();
+}
+S.form=loadInitial();
+
+function showToast(msg,color="#0F4C75"){
+  if(S.toastTimer)clearTimeout(S.toastTimer);
+  S.toast={msg,color};render();
+  S.toastTimer=setTimeout(()=>{S.toast=null;render();},3000);
+}
+function setForm(patch){S.form={...S.form,...patch};saveLS(S.form);render();}
+function getAllWorkers(){return["佐土原",...(S.form.extraWorkers||[])].filter(Boolean);}
+function updateMadori(madori){
+  const ids=getBaseRoomIds(madori);
+  const extraIds=S.form.extraRooms||[];
+  const allIds=[...ids,...extraIds];
+  const existing=S.form.rooms;
+  setForm({madori,rooms:allIds.map(id=>existing.find(r=>r.roomId===id)||newRoomData(id))});
+}
+function updateRoom(id,patch){setForm({rooms:S.form.rooms.map(r=>r.roomId===id?{...r,...patch}:r)});}
+function saveRoom(id){const t=new Date().toLocaleTimeString("ja-JP",{hour:"2-digit",minute:"2-digit"});updateRoom(id,{savedAt:t});showToast("💾 一時保存しました","#0F4C75");}
+function getRoomData(id){return S.form.rooms.find(r=>r.roomId===id);}
+function getActiveRoomIds(){return[...getBaseRoomIds(S.form.madori),...(S.form.extraRooms||[])];}
+function addExtraRoom(id){
+  if((S.form.extraRooms||[]).includes(id))return;
+  setForm({extraRooms:[...(S.form.extraRooms||[]),id],rooms:[...S.form.rooms,newRoomData(id)]});
+  showToast(`✅ ${getRoomInfo(id).label}を追加しました`,"#10B981");
+}
+function removeExtraRoom(id){setForm({extraRooms:(S.form.extraRooms||[]).filter(r=>r!==id),rooms:S.form.rooms.filter(r=>r.roomId!==id)});}
+function handlePhotos(key,files,isArray){
+  if(!files?.length)return;
+  if(isArray){const p=Array.from(files).map(f=>({url:URL.createObjectURL(f),name:f.name,file:f}));setForm({[key]:[...(S.form[key]||[]),...p].slice(0,10)});}
+  else{setForm({[key]:{url:URL.createObjectURL(files[0]),name:files[0].name,file:files[0]}});}
+}
+function handleRoomPhoto(id,type,files){
+  const p=Array.from(files).map(f=>({url:URL.createObjectURL(f),name:f.name,file:f}));
+  const rd=getRoomData(id);
+  updateRoom(id,{[type]:[...(rd[type]||[]),...p].slice(0,10)});
+}
+function handleConfirmPhoto(i,file){
+  if(!file)return;
+  const arr=[...S.form.confirmPhotos];
+  arr[i]={url:URL.createObjectURL(file),name:file.name,file:file};
+  setForm({confirmPhotos:arr});
+}
+
+// 画像をbase64に変換
+async function fileToBase64(file){
+  return new Promise((res,rej)=>{
+    const r=new FileReader();
+    r.onload=e=>res(e.target.result.split(",")[1]);
+    r.onerror=rej;
+    r.readAsDataURL(file);
+  });
+}
+
+async function photosToBase64(photos){
+  if(!photos||!photos.length)return[];
+  const result=[];
+  for(const p of photos){
+    if(p&&p.file){try{result.push(await fileToBase64(p.file));}catch(e){result.push(null);}}
+    else result.push(null);
+  }
+  return result;
+}
+
+// GAS送信
+async function sendToGAS(data){
+  const url=GAS_URL;
+  try{
+    const res=await fetch(url,{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:"data="+encodeURIComponent(JSON.stringify(data))});
+    return await res.json();
+  }catch(e){
+    // GETにフォールバック
+    try{
+      const res=await fetch(url+"?data="+encodeURIComponent(JSON.stringify(data)));
+      return await res.json();
+    }catch(e2){throw e2;}
+  }
+}
+
+// 開始報告をGASへ送信
+async function submitStartReport(){
+  if(S.sending)return;
+  S.sending=true;S.gasStatus="sending";render();
+  try{
+    const f=S.form;
+    const rooms=[];
+    for(const p of (f.startReportPhotos||[])){
+      if(p&&p.file)rooms.push({label:"作業前",photos:[await fileToBase64(p.file)]});
+    }
+    const data={type:"start_report",propertyName:f.propertyName,address:f.address,dateStart:f.dateStart,startTime:f.startTime,workers:getAllWorkers(),photoCount:(f.startReportPhotos||[]).length,rooms};
+    const result=await sendToGAS(data);
+    S.gasStatus="ok";
+    setForm({startReportSent:true});
+    showToast("✅ スプレッドシートに記録しました！","#10B981");
+    saveHistory({type:"start",propertyName:f.propertyName,dateStart:f.dateStart,workers:getAllWorkers()});
+  }catch(e){
+    S.gasStatus="err";
+    showToast("⚠️ 送信エラー。テキストをコピーしてLINEで送ってください","#EF4444");
+  }finally{S.sending=false;render();}
+}
+
+// 完了報告をGASへ送信
+async function submitFullReport(){
+  if(S.sending)return;
+  S.sending=true;S.gasStatus="sending";render();
+  try{
+    const f=S.form;
+    const rooms=[];
+    for(const rd of f.rooms){
+      const room=getRoomInfo(rd.roomId);
+      const beforePhotos=await photosToBase64(rd.beforePhotos||[]);
+      const afterPhotos=await photosToBase64(rd.afterPhotos||[]);
+      rooms.push({roomId:rd.roomId,label:room?room.label:rd.roomId,status:rd.status,checks:rd.checks,memo:rd.memo,beforePhotos,afterPhotos});
+    }
+    const data={propertyName:f.propertyName,address:f.address,dateStart:f.dateStart,dateEnd:f.dateEnd,services:f.services,serviceOther:f.serviceOther,startTime:f.startTime,endTime:f.endTime,workers:getAllWorkers(),siteType:f.siteType,madori:f.madori,hasKey:f.hasKey,autolockNo:f.autolockNo,keyboxNo:f.keyboxNo,hasParking:f.hasParking,parkingFee:f.parkingFee,overallJudge:f.overallJudge,reportMemo:f.reportMemo,inspectorName:f.inspectorName,clientEmail:f.clientEmail,rooms};
+    const result=await sendToGAS(data);
+    S.gasStatus="ok";
+    showToast("✅ スプレッドシートと写真フォルダに保存しました！","#10B981");
+    saveHistory({type:"complete",propertyName:f.propertyName,dateStart:f.dateStart,overallJudge:f.overallJudge,workers:getAllWorkers(),folderLink:result.mainFolderLink||""});
+  }catch(e){
+    S.gasStatus="err";
+    showToast("⚠️ 送信エラー。テキストをコピーしてLINEに送ってください","#EF4444");
+  }finally{S.sending=false;render();}
+}
+
+// レポートテキスト
+function buildStartText(){
+  const f=S.form;const workers=getAllWorkers();
+  const now=new Date().toLocaleTimeString("ja-JP",{hour:"2-digit",minute:"2-digit"});
+  return["いつもお世話になっております。",`${workers[0]}でございます。`,"","本日の清掃作業を開始いたしましたので、","ご報告申し上げます。","","━━━━━━━━━━━━━━━━","🔔 作業開始報告","━━━━━━━━━━━━━━━━",`🏠 物件名：${f.propertyName||"（未入力）"}`,`📍 住所：${f.address||"（未入力）"}`,`📅 日付：${f.dateStart||"（未入力）"}`,`⏰ 開始時刻：${f.startTime||now}`,`👤 担当者：${workers.join("、")||"（未入力）"}`,`📸 作業前写真：${(f.startReportPhotos||[]).length}枚`,"","引き続きどうぞよろしくお願いいたします。","━━━━━━━━━━━━━━━━"].join("\n");
+}
+function buildReportText(){
+  const f=S.form;const workers=getAllWorkers();
+  const dateStr=f.dateEnd?`${f.dateStart} ～ ${f.dateEnd}`:f.dateStart;
+  const lines=["いつもお世話になっております。",`${workers[0]}でございます。`,"","本日の清掃作業が完了いたしましたので、","ご報告申し上げます。","","━━━━━━━━━━━━━━━━━━━━","📋 清掃完了報告書","━━━━━━━━━━━━━━━━━━━━",`🏠 物件名：${f.propertyName||"—"}`,`📍 住所：${f.address||"—"}`,`📅 清掃日：${dateStr||"—"}`,`⏰ 作業時間：${f.startTime&&f.endTime?`${f.startTime}〜${f.endTime}`:"—"}`,`👤 担当者：${workers.join("、")||"—"}`,`🏢 現場種別：${f.siteType||"—"} / 間取り：${f.madori||"—"}${f.madoriEx?.length?`（${f.madoriEx.join("・")}）`:""}`,`🔧 依頼内容：${f.services.join("、")||"—"}${f.serviceOther?`（${f.serviceOther}）`:""}`,``,`【エリア別作業結果】`];
+  getActiveRoomIds().forEach(id=>{
+    const room=getRoomInfo(id);if(!room)return;
+    const rd=getRoomData(id)||{status:"未完了",checks:[],memo:""};
+    const icon={"完了":"✅","未完了":"❌","対象外":"➖"}[rd.status]||"❓";
+    lines.push(`${icon} ${room.label}：${rd.status}`);
+    if(rd.checks.length>0)lines.push(`   ✓ ${rd.checks.join("、")}`);
+    if(rd.memo)lines.push(`   📝 ${rd.memo}`);
+    if((rd.beforePhotos||[]).length||(rd.afterPhotos||[]).length)lines.push(`   📸 Before${(rd.beforePhotos||[]).length}枚 / After${(rd.afterPhotos||[]).length}枚`);
+  });
+  lines.push(``,`━━━━━━━━━━━━━━━━━━━━`,`📊 総合判定：${f.overallJudge||"—"}`);
+  if(f.reportMemo)lines.push(`📝 報告メモ：${f.reportMemo}`);
+  lines.push(`🔍 検査者：${f.inspectorName||"—"}`);
+  if(f.hasParking)lines.push(`🚗 駐車場料金：¥${f.parkingFee}`);
+  lines.push(``,`【お写真について】`,`お写真はスプレッドシート内のURLより、`,`各エリア別のフォルダ内に格納しております。`,`ご確認のほどよろしくお願いいたします。`,``,`引き続きどうぞよろしくお願いいたします。`,`━━━━━━━━━━━━━━━━━━━━`);
+  return lines.join("\n");
+}
+
+// ========== Render ==========
+function render(){
+  const app=document.getElementById("app");
+  if(S.page==="main")app.innerHTML=renderMain();
+  else if(S.page==="startReport")app.innerHTML=renderStartReport();
+  else if(S.page==="room")app.innerHTML=renderRoom();
+  else if(S.page==="preview")app.innerHTML=renderPreview();
+  else if(S.page==="history")app.innerHTML=renderHistory();
+  if(S.toast){const t=document.createElement("div");t.className="toast";t.textContent=S.toast.msg;t.style.background=S.toast.color;app.appendChild(t);}
+}
+
+function renderMain(){
+  const f=S.form;
+  const activeIds=getActiveRoomIds();
+  const comp=S.form.rooms.filter(r=>r.status==="完了").length;
+  const saved=loadLS();
+  const extraRooms=f.extraRooms||[];
+  return`
+  <div class="header">
+    <div class="header-icon">🧹</div>
+    <div><div style="font-size:10px;opacity:.75;letter-spacing:2px">CLEANING REPORT</div><div style="font-size:19px;font-weight:800">清掃報告書</div></div>
+    <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+      <button onclick="goPage('history')" style="background:rgba(255,255,255,0.15);border:none;color:white;border-radius:10px;padding:6px 10px;font-size:12px;cursor:pointer;font-weight:700;font-family:inherit">📋 履歴</button>
+      <div class="badge">${comp}/${activeIds.length} 完了</div>
+    </div>
+  </div>
+  <div class="body">
+    ${saved?`<div class="save-notice">💾 前回の入力内容を復元しました（写真は再度追加してください）<button onclick="clearAndReset()" style="margin-left:8px;background:none;border:1px solid #92400E;color:#92400E;border-radius:6px;padding:2px 8px;font-size:10px;cursor:pointer;">リセット</button></div>`:""}
+
+    <div onclick="goPage('startReport')" style="background:${f.startReportSent?"linear-gradient(135deg,#10B981,#059669)":"linear-gradient(135deg,#F59E0B,#D97706)"};border-radius:16px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:12px;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,0.12);">
+      <span style="font-size:28px">${f.startReportSent?"✅":"🔔"}</span>
+      <div style="flex:1"><div style="color:white;font-weight:800;font-size:15px">${f.startReportSent?"開始報告 送信済み":"作業開始報告を送る"}</div><div style="color:rgba(255,255,255,0.85);font-size:12px;margin-top:2px">${f.startReportSent?"タップして確認・再送信":"作業前写真をGoogleドライブへ保存＋LINE送信"}</div></div>
+      <span style="color:rgba(255,255,255,0.7);font-size:20px">›</span>
+    </div>
+
+    <div class="section">
+      <div class="section-title">📋 基本情報</div>
+      <div class="row"><div class="label">清掃日（開始）</div><input type="date" value="${f.dateStart}" onchange="setForm({dateStart:this.value})"></div>
+      <div class="row"><div class="label">清掃日（終了）※複数日の場合</div><input type="date" value="${f.dateEnd}" onchange="setForm({dateEnd:this.value})"><div class="hint">1日のみの場合は空欄でOK</div></div>
+      <div class="row"><div class="label">物件名</div><input type="text" value="${f.propertyName}" placeholder="例：グランドパレス渋谷 301号室" onchange="setForm({propertyName:this.value})"></div>
+      <div class="row"><div class="label">住所</div><input type="text" value="${f.address}" placeholder="例：東京都渋谷区..." onchange="setForm({address:this.value})"></div>
+      <div class="row">
+        <div class="label">依頼内容（複数選択可）</div>
+        <div class="chip-wrap">${SERVICE_TYPES.map(s=>`<button class="chip${f.services.includes(s)?" active":""}" onclick="toggleService('${s}')">${s}</button>`).join("")}</div>
+        ${f.services.includes("その他")?`<div style="margin-top:8px"><input type="text" value="${f.serviceOther||""}" placeholder="その他の内容を入力..." onchange="setForm({serviceOther:this.value})"></div>`:""}
+      </div>
+      <div class="row"><div class="label">開始時刻</div><input type="time" value="${f.startTime}" onchange="setForm({startTime:this.value})"></div>
+      <div class="row"><div class="label">終了時刻</div><input type="time" value="${f.endTime}" onchange="setForm({endTime:this.value})"></div>
+      <div class="row">
+        <div class="label">作業担当者</div>
+        <div style="margin-bottom:8px">
+          <span class="worker-fixed">佐土原 👑</span>
+          ${(f.extraWorkers||[]).map((w,i)=>`<span style="display:inline-flex;align-items:center;gap:6px;background:#F1F5F9;color:#555;border-radius:20px;padding:8px 14px;font-size:13px;font-weight:700;margin-right:8px;margin-bottom:8px">${w}<button onclick="removeWorker(${i})" style="background:none;border:none;color:#EF4444;cursor:pointer;font-size:14px;padding:0;line-height:1">×</button></span>`).join("")}
+        </div>
+        <div style="display:flex;gap:8px"><input type="text" id="newWorkerInput" placeholder="担当者名を入力..." style="flex:1"><button class="small-btn" onclick="addWorker()">追加</button></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">🏢 現場情報</div>
+      <div class="row"><div class="label">現場種別</div><div class="chip-wrap">${SITE_TYPES.map(s=>`<button class="chip${f.siteType===s?" active":""}" onclick="setForm({siteType:'${s}'})">${s}</button>`).join("")}</div></div>
+      <div class="row">
+        <div class="label">間取り（居室数が自動で変わります）</div>
+        <select onchange="updateMadori(this.value)">
+          <option value="">選択してください</option>
+          ${MADORI_OPTIONS.map(m=>`<option value="${m.val}"${f.madori===m.val?" selected":""}>${m.label}</option>`).join("")}
+        </select>
+      </div>
+      <div class="row">
+        <div class="label">補足オプション</div>
+        ${MADORI_EX.map(ex=>`<div class="check-item${(f.madoriEx||[]).includes(ex)?" checked":""}" onclick="toggleMadoriEx('${ex}')"><div class="check-box${(f.madoriEx||[]).includes(ex)?" checked":""}">${(f.madoriEx||[]).includes(ex)?'<span style="color:white;font-size:11px;font-weight:800">✓</span>':""}</div><span style="font-size:13px;font-weight:${(f.madoriEx||[]).includes(ex)?700:400};color:${(f.madoriEx||[]).includes(ex)?"#1B6CA8":"#555"}">${ex}</span></div>`).join("")}
+      </div>
+      <div class="row"><div class="label">鍵の有無</div><div class="chip-wrap"><button class="chip${f.hasKey===true?" active":""}" onclick="setForm({hasKey:true})">有</button><button class="chip${f.hasKey===false?" active":""}" onclick="setForm({hasKey:false})">無</button></div></div>
+      <div class="row"><div class="label">オートロック番号</div><input type="text" value="${f.autolockNo}" onchange="setForm({autolockNo:this.value})"></div>
+      <div class="row"><div class="label">キーボックス番号</div><input type="text" value="${f.keyboxNo}" onchange="setForm({keyboxNo:this.value})"></div>
+      <div class="row"><div class="label">駐車場の有無</div><div class="chip-wrap"><button class="chip${f.hasParking===true?" active":""}" onclick="setForm({hasParking:true})">有</button><button class="chip${f.hasParking===false?" active":""}" onclick="setForm({hasParking:false})">無</button></div></div>
+      ${f.hasParking?`
+      <div class="row"><div class="label">駐車場料金</div><div style="display:flex;align-items:center;gap:6px"><span style="color:#555;font-weight:600">¥</span><input type="number" value="${f.parkingFee}" onchange="setForm({parkingFee:this.value})" style="width:140px"></div></div>
+      <div class="row">
+        <div class="label">駐車場レシート写真</div>
+        ${f.parkingReceipt?`<div style="position:relative;width:120px;height:120px"><img src="${f.parkingReceipt.url}" style="width:100%;height:100%;object-fit:cover;border-radius:10px"><button class="photo-remove" onclick="setForm({parkingReceipt:null})">×</button></div>`:`<div class="photo-add" style="width:120px;height:120px" onclick="document.getElementById('parkingInput').click()"><span style="font-size:26px">📷</span><span>撮影</span></div>`}
+        <input id="parkingInput" type="file" accept="image/*" style="display:none" onchange="handlePhotos('parkingReceipt',this.files)">
+      </div>`:""}
+    </div>
+
+    <div class="section">
+      <div class="section-title">🗂️ 清掃エリア</div>
+      <div style="font-size:12px;color:#666;margin-bottom:12px">各エリアをタップして詳細を入力</div>
+      ${activeIds.map(id=>{
+        const room=getRoomInfo(id);if(!room)return"";
+        const rd=getRoomData(id)||{status:"未完了",beforePhotos:[],afterPhotos:[],checks:[],savedAt:null};
+        const cfg=STATUS_CONFIG[rd.status]||STATUS_CONFIG["未完了"];
+        const isExtra=(f.extraRooms||[]).includes(id);
+        return`<div style="position:relative">
+          <div class="room-card" style="border-left-color:${cfg.color}" onclick="goRoom('${id}')">
+            <span style="font-size:22px">${room.icon}</span>
+            <div style="flex:1"><div style="font-weight:700;font-size:14px">${room.label}</div><div style="font-size:11px;color:#888;margin-top:2px">${rd.savedAt?rd.savedAt+" 保存済 ":""}📸 前${(rd.beforePhotos||[]).length}/後${(rd.afterPhotos||[]).length}${rd.checks.length>0?` · ✓${rd.checks.length}項目`:""}</div></div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><div class="status-badge" style="background:${cfg.color}">${cfg.icon} ${rd.status}</div><span style="color:#CCC;font-size:18px">›</span></div>
+          </div>
+          ${isExtra?`<button onclick="removeExtraRoom('${id}')" style="position:absolute;top:8px;right:52px;background:none;border:none;color:#EF4444;font-size:11px;cursor:pointer;font-weight:700">削除</button>`:""}
+        </div>`;
+      }).join("")}
+      <div style="margin-top:8px">
+        ${!extraRooms.includes("toilet2")?`<button class="add-room-btn" onclick="addExtraRoom('toilet2')">＋ トイレ2 を追加</button>`:""}
+        ${!extraRooms.includes("washroom2")?`<button class="add-room-btn" onclick="addExtraRoom('washroom2')">＋ 洗面所2 を追加</button>`:""}
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">📊 総合チェック</div>
+      <div class="row"><div class="label">総合判定</div><div class="chip-wrap">${OVERALL_JUDGES.map(j=>`<button onclick="setForm({overallJudge:'${j.label}'})" style="padding:11px 16px;border-radius:12px;border:none;cursor:pointer;font-weight:700;font-size:13px;background:${f.overallJudge===j.label?j.color:"#F1F5F9"};color:${f.overallJudge===j.label?"white":"#555"};font-family:inherit">${j.label}</button>`).join("")}</div></div>
+      <div class="row"><div class="label">報告メモ</div><textarea rows="4" placeholder="総合所見、特記事項など..." onchange="setForm({reportMemo:this.value})">${f.reportMemo}</textarea></div>
+      <div class="row">
+        <div class="label">要確認写真（最大10枚）</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:4px">
+          ${f.confirmPhotos.map((p,i)=>p?`<div style="position:relative"><img src="${p.url}" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px"><button class="photo-remove" onclick="removeConfirmPhoto(${i})">×</button></div>`:`<div class="photo-add" onclick="document.getElementById('confirm_${i}').click()"><span style="font-size:18px">📷</span><span style="font-size:9px">${i+1}</span></div>`).join("")}
+          ${f.confirmPhotos.map((_,i)=>`<input id="confirm_${i}" type="file" accept="image/*" style="display:none" onchange="handleConfirmPhoto(${i},this.files[0])">`).join("")}
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">👤 検査者情報</div>
+      <div class="row"><div class="label">検査者名</div><input type="text" value="${f.inspectorName}" onchange="setForm({inspectorName:this.value})"></div>
+      <div class="row"><div class="label">クライアントメール</div><input type="email" value="${f.clientEmail}" placeholder="example@email.com" onchange="setForm({clientEmail:this.value})"><div class="hint">入力するとプレビュー画面からメール送信できます</div></div>
+    </div>
+  </div>
+  <div class="footer"><button class="primary-btn" onclick="goPage('preview')">📄 報告書プレビュー・作成</button></div>`;
+}
+
+function renderStartReport(){
+  const f=S.form;
+  const isSending=S.sending;
+  const gasOk=S.gasStatus==="ok";
+  return`
+  <div class="header" style="background:linear-gradient(135deg,#F59E0B,#D97706)">
+    <button class="back-btn" onclick="goPage('main')">← 戻る</button>
+    <div style="text-align:center;flex:1"><div style="font-size:10px;opacity:.8;letter-spacing:2px">START REPORT</div><div style="font-size:17px;font-weight:800">作業開始報告</div></div>
+    <div style="width:60px"></div>
+  </div>
+  <div class="body">
+    <div class="section">
+      <div class="section-title">📋 報告対象物件</div>
+      <div style="background:#FFFBEB;border-radius:12px;padding:12px 14px">
+        <div style="font-weight:700;font-size:16px">${f.propertyName||"（物件名未入力）"}</div>
+        <div style="font-size:13px;color:#666;margin-top:4px">${f.address||"（住所未入力）"}</div>
+        <div style="font-size:13px;color:#444;margin-top:4px">📅 ${f.dateStart||"—"} ⏰ ${f.startTime||"—"} 👤 ${getAllWorkers().join("、")||"—"}</div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title">📷 作業前写真</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+        ${(f.startReportPhotos||[]).map((p,i)=>`<div style="position:relative"><img src="${p.url}" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px"><button class="photo-remove" onclick="removeStartPhoto(${i})">×</button></div>`).join("")}
+        ${(f.startReportPhotos||[]).length<10?`<div class="photo-add" style="aspect-ratio:1" onclick="document.getElementById('startPhotoInput').click()"><span style="font-size:26px">📷</span><span style="font-size:11px;font-weight:600">追加</span></div>`:""}
+      </div>
+      <input id="startPhotoInput" type="file" accept="image/*" multiple style="display:none" onchange="handlePhotos('startReportPhotos',this.files,true)">
+    </div>
+    <div class="section">
+      <div class="section-title">📤 送信する</div>
+      ${S.gasStatus==="sending"?`<div class="gas-status gas-sending">⏳ スプレッドシートと写真フォルダに保存中です…少々お待ちください</div>`:""}
+      ${S.gasStatus==="ok"?`<div class="gas-status gas-ok">✅ スプレッドシートへの記録が完了しました！</div>`:""}
+      ${S.gasStatus==="err"?`<div class="gas-status gas-err">⚠️ 送信エラーが発生しました。テキストをコピーしてLINEで送ってください</div>`:""}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+        <button class="share-btn" style="background:${isSending?"#94A3B8":"#00C300"}" onclick="${isSending?"":"copyText(buildStartText())"}">
+          <span style="font-size:24px">💬</span><span>LINEコピー</span>
+        </button>
+        <button class="share-btn" style="background:${isSending?"#94A3B8":"#F59E0B"}" onclick="${isSending?"":"submitStartReport()"}">
+          <span style="font-size:24px">${isSending?"⏳":"📊"}</span><span>${isSending?"送信中...":"スプシ＋Drive保存"}</span>
+        </button>
+      </div>
+      <button class="share-btn" style="background:#1B6CA8;width:100%;flex-direction:row;gap:10px;justify-content:center" onclick="sendStartEmail()">
+        <span style="font-size:20px">✉️</span><span>メールで送る</span>
+      </button>
+      <details style="margin-top:12px">
+        <summary style="font-size:12px;color:#1B6CA8;cursor:pointer;font-weight:700">📄 LINE用テキストを確認</summary>
+        <pre style="margin-top:8px;font-size:11px;color:#444;background:#F8FAFC;border-radius:10px;padding:12px;white-space:pre-wrap;line-height:1.7">${buildStartText()}</pre>
+      </details>
+    </div>
+    <button class="primary-btn" style="background:linear-gradient(135deg,#F59E0B,#D97706);margin-bottom:40px" onclick="goPage('main')">← メイン画面に戻る</button>
+  </div>`;
+}
+
+function renderRoom(){
+  const id=S.activeRoom;const room=getRoomInfo(id);
+  const data=getRoomData(id)||{status:"未完了",checks:[],memo:"",beforePhotos:[],afterPhotos:[]};
+  if(!room)return"";
+  return`
+  <div class="header" style="background:linear-gradient(135deg,#0F4C75,#1B6CA8)">
+    <button class="back-btn" onclick="goPage('main')">← 戻る</button>
+    <div style="text-align:center;flex:1"><div style="font-size:22px">${room.icon}</div><div style="font-size:16px;font-weight:800">${room.label}</div></div>
+    <div style="width:60px"></div>
+  </div>
+  <div class="body">
+    <div class="section">
+      <div class="section-title">⚡ ステータス</div>
+      <div style="display:flex;gap:8px">${STATUSES.map(s=>{const c=STATUS_CONFIG[s];const a=data.status===s;return`<button onclick="updateRoom('${id}',{status:'${s}'})" style="flex:1;padding:12px 8px;border-radius:14px;border:none;cursor:pointer;font-weight:800;font-size:14px;background:${a?c.color:"#F1F5F9"};color:${a?"white":"#555"};font-family:inherit;display:flex;align-items:center;justify-content:center;gap:4px">${c.icon} ${s}</button>`;}).join("")}</div>
+    </div>
+    <div class="section">
+      <div class="section-title">✅ チェック項目</div>
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <button class="small-btn" onclick="toggleAllChecks('${id}')">${data.checks.length===room.checks.length?"全解除":"全選択"}</button>
+        <span style="font-size:12px;color:#888;align-self:center">選択中: ${data.checks.length}項目</span>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">
+        ${room.checks.map((item,ci)=>`<div onclick="toggleCheckByIndex('${id}',${ci})" style="display:flex;align-items:center;gap:7px;padding:8px 12px;border-radius:10px;cursor:pointer;background:${data.checks.includes(item)?"#EFF6FF":"#F8FAFC"};border:1.5px solid ${data.checks.includes(item)?"#1B6CA8":"#E2E8F0"}"><div style="width:18px;height:18px;border-radius:5px;border:2px solid ${data.checks.includes(item)?"#1B6CA8":"#CBD5E1"};background:${data.checks.includes(item)?"#1B6CA8":"white"};display:flex;align-items:center;justify-content:center;flex-shrink:0">${data.checks.includes(item)?'<span style="color:white;font-size:11px;font-weight:800">✓</span>':""}</div><span style="font-size:13px;font-weight:${data.checks.includes(item)?700:400};color:${data.checks.includes(item)?"#1B6CA8":"#555"}">${item}</span></div>`).join("")}
+      </div>
+    </div>
+    <div class="section"><div class="section-title">📝 備考</div><textarea rows="3" placeholder="気になった点、特記事項など..." onchange="updateRoom('${id}',{memo:this.value})">${data.memo||""}</textarea></div>
+    <div class="section">
+      <div class="section-title">📷 Before 写真（最大10枚）</div>
+      <div class="photo-grid">
+        ${(data.beforePhotos||[]).map((p,i)=>`<div class="photo-wrap"><img src="${p.url}"><button class="photo-remove" onclick="removeRoomPhoto('${id}','beforePhotos',${i})">×</button></div>`).join("")}
+        ${(data.beforePhotos||[]).length<10?`<div class="photo-add" onclick="document.getElementById('before_${id}').click()"><span style="font-size:22px">📷</span><span>Before</span></div>`:""}
+      </div>
+      <input id="before_${id}" type="file" accept="image/*" multiple style="display:none" onchange="handleRoomPhoto('${id}','beforePhotos',this.files)">
+    </div>
+    <div class="section">
+      <div class="section-title">✨ After 写真（最大10枚）</div>
+      <div class="photo-grid">
+        ${(data.afterPhotos||[]).map((p,i)=>`<div class="photo-wrap"><img src="${p.url}"><button class="photo-remove" onclick="removeRoomPhoto('${id}','afterPhotos',${i})">×</button></div>`).join("")}
+        ${(data.afterPhotos||[]).length<10?`<div class="photo-add" onclick="document.getElementById('after_${id}').click()"><span style="font-size:22px">✨</span><span>After</span></div>`:""}
+      </div>
+      <input id="after_${id}" type="file" accept="image/*" multiple style="display:none" onchange="handleRoomPhoto('${id}','afterPhotos',this.files)">
+    </div>
+    <button class="primary-btn" style="background:linear-gradient(135deg,#0F4C75,#1B6CA8);margin-bottom:40px" onclick="saveRoom('${id}')">💾 一時保存${data.savedAt?`<span style="font-size:11px;font-weight:400;margin-left:8px;opacity:.8">${data.savedAt}</span>`:""}</button>
+  </div>`;
+}
+
+function renderPreview(){
+  const f=S.form;
+  const dateStr=f.dateEnd?`${f.dateStart} ～ ${f.dateEnd}`:f.dateStart;
+  const activeIds=getActiveRoomIds();
+  const comp=S.form.rooms.filter(r=>r.status==="完了").length;
+  const isSending=S.sending;
+  return`
+  <div class="header" style="background:linear-gradient(135deg,#1a1a2e,#16213e)">
+    <button class="back-btn" onclick="goPage('main')">← 戻る</button>
+    <div style="text-align:center;flex:1"><div style="font-size:10px;opacity:.7;letter-spacing:2px">PREVIEW</div><div style="font-size:16px;font-weight:800">報告書プレビュー</div></div>
+    <div style="width:60px"></div>
+  </div>
+  <div class="body">
+    ${S.gasStatus==="sending"?`<div class="gas-status gas-sending">⏳ スプレッドシートと写真フォルダに保存中です…しばらくお待ちください</div>`:""}
+    ${S.gasStatus==="ok"?`<div class="gas-status gas-ok">✅ スプレッドシートと写真フォルダへの保存が完了しました！</div>`:""}
+    ${S.gasStatus==="err"?`<div class="gas-status gas-err">⚠️ 送信エラー。テキストをコピーしてLINEで送ってください</div>`:""}
+
+    <div class="preview-card">
+      <div class="preview-title">📤 報告書を送る</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+        <button class="share-btn" style="background:#00C300" onclick="copyText(buildReportText())">
+          <span style="font-size:22px">💬</span><span>LINE用コピー</span>
+        </button>
+        <button class="share-btn" style="background:${isSending?"#94A3B8":"#10B981"}" onclick="${isSending?"void(0)":"submitFullReport()"}">
+          <span style="font-size:22px">${isSending?"⏳":"📊"}</span><span>${isSending?"保存中...":"スプシ＋Drive保存"}</span>
+        </button>
+      </div>
+      <button class="share-btn" style="background:#1B6CA8;width:100%;flex-direction:row;gap:10px;justify-content:center;margin-bottom:10px" onclick="sendReportEmail()">
+        <span style="font-size:20px">✉️</span><span>メールで送る${f.clientEmail?"":" （要メール入力）"}</span>
+      </button>
+      ${f.clientEmail?`<div style="font-size:11px;color:#555">📧 送信先：${f.clientEmail}</div>`:`<div style="font-size:11px;color:#EF4444">⚠️ メール送信にはクライアントメールの入力が必要です</div>`}
+      <details style="margin-top:10px">
+        <summary style="font-size:12px;color:#1B6CA8;cursor:pointer;font-weight:700">📄 LINE用テキストを確認</summary>
+        <pre style="margin-top:8px;font-size:11px;color:#444;background:#F8FAFC;border-radius:10px;padding:12px;white-space:pre-wrap;line-height:1.7">${buildReportText()}</pre>
+      </details>
+    </div>
+
+    ${activeIds.some(id=>{const rd=getRoomData(id);return rd&&((rd.beforePhotos||[]).length||(rd.afterPhotos||[]).length);})?`
+    <div class="preview-card">
+      <div class="preview-title">📸 Before / After 写真まとめ</div>
+      ${activeIds.map(id=>{
+        const room=getRoomInfo(id);const rd=getRoomData(id);
+        if(!rd||((rd.beforePhotos||[]).length===0&&(rd.afterPhotos||[]).length===0))return"";
+        return`<div style="margin-bottom:14px">
+          <div style="font-weight:700;font-size:13px;margin-bottom:6px">${room.icon} ${room.label}</div>
+          ${(rd.beforePhotos||[]).length?`<div style="font-size:11px;color:#888;margin-bottom:4px">Before (${rd.beforePhotos.length}枚)</div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px">${rd.beforePhotos.slice(0,5).map(p=>`<img src="${p.url}" style="width:60px;height:60px;object-fit:cover;border-radius:8px">`).join("")}</div>`:""}
+          ${(rd.afterPhotos||[]).length?`<div style="font-size:11px;color:#888;margin-bottom:4px">After (${rd.afterPhotos.length}枚)</div><div style="display:flex;gap:6px;flex-wrap:wrap">${rd.afterPhotos.slice(0,5).map(p=>`<img src="${p.url}" style="width:60px;height:60px;object-fit:cover;border-radius:8px">`).join("")}</div>`:""}
+        </div>`;
+      }).join("")}
+      <div class="photo-guide">
+        <div class="photo-guide-title">📱 LINEへの写真送付手順</div>
+        1. 写真を長押し→「写真を保存」でスマホに保存<br>
+        2. LINEを開いてアルバムを作成→場所ごとにまとめて送信<br>
+        3. テキストをコピーして一緒に貼り付けると伝わりやすいです
+      </div>
+    </div>`:""}
+
+    <div style="background:linear-gradient(135deg,#0F4C75,#1B6CA8);border-radius:18px;overflow:hidden;margin-bottom:14px">
+      <div style="padding:20px;color:white">
+        <div style="font-size:10px;opacity:.8;letter-spacing:2px">清掃完了報告書</div>
+        <div style="font-size:22px;font-weight:800;margin:4px 0 2px">${f.propertyName||"（物件名未入力）"}</div>
+        <div style="font-size:12px;opacity:.85">${f.address||""}</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.1);padding:14px 20px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+        ${[["清掃日",dateStr||"—"],["完了エリア",`${comp}/${activeIds.length}`],["総合判定",f.overallJudge||"—"]].map(([l,v])=>`<div style="text-align:center"><div style="font-size:9px;color:rgba(255,255,255,0.7);margin-bottom:2px">${l}</div><div style="font-size:13px;font-weight:800;color:white">${v}</div></div>`).join("")}
+      </div>
+    </div>
+
+    <div class="preview-card">
+      <div class="preview-title">基本情報</div>
+      ${[["依頼内容",f.services.join("、")||"—"],["作業時間",f.startTime&&f.endTime?`${f.startTime} ～ ${f.endTime}`:"—"],["担当者",getAllWorkers().join("、")||"—"],["現場種別",f.siteType||"—"],["間取り",f.madori?`${f.madori}${f.madoriEx?.length?`（${f.madoriEx.join("・")}）`:""}` :"—"],["鍵の有無",f.hasKey===true?"有":f.hasKey===false?"無":"—"],["駐車場",f.hasParking===true?`有 ¥${f.parkingFee}`:f.hasParking===false?"無":"—"],["検査者",f.inspectorName||"—"]].map(([l,v])=>`<div class="preview-row"><span class="preview-label">${l}</span><span class="preview-val">${v}</span></div>`).join("")}
+    </div>
+
+    <div class="preview-card">
+      <div class="preview-title">エリア別結果</div>
+      ${activeIds.map(id=>{
+        const room=getRoomInfo(id);if(!room)return"";
+        const rd=getRoomData(id)||{status:"未完了",checks:[],memo:""};
+        const cfg=STATUS_CONFIG[rd.status]||STATUS_CONFIG["未完了"];
+        return`<div style="border-bottom:1px solid #F0F4F8;padding-bottom:12px;margin-bottom:12px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span>${room.icon}</span><span style="font-weight:700;font-size:14px;flex:1">${room.label}</span><span style="background:${cfg.color};color:white;font-size:11px;font-weight:700;border-radius:8px;padding:2px 10px">${cfg.icon} ${rd.status}</span></div>
+          ${rd.checks.length>0?`<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px">${rd.checks.map(c=>`<span style="background:#EFF6FF;color:#1B6CA8;font-size:11px;border-radius:6px;padding:2px 7px">${c}</span>`).join("")}</div>`:""}
+          ${rd.memo?`<div style="font-size:12px;color:#555">📝 ${rd.memo}</div>`:""}
+        </div>`;
+      }).join("")}
+    </div>
+    ${f.reportMemo?`<div class="preview-card"><div class="preview-title">報告メモ</div><p style="font-size:14px;color:#333;line-height:1.7">${f.reportMemo}</p></div>`:""}
+    <div style="text-align:center;padding:16px;color:#AAA;font-size:11px;margin-bottom:20px">本報告書は清掃完了時に生成されました</div>
+  </div>`;
+}
+
+function renderHistory(){
+  const history=getHistory();
+  return`
+  <div class="header">
+    <button class="back-btn" onclick="goPage('main')">← 戻る</button>
+    <div style="text-align:center;flex:1"><div style="font-size:10px;opacity:.75;letter-spacing:2px">HISTORY</div><div style="font-size:17px;font-weight:800">報告履歴</div></div>
+    <div style="width:60px"></div>
+  </div>
+  <div class="body">
+    ${history.length===0?`<div style="text-align:center;padding:40px;color:#888"><div style="font-size:40px;margin-bottom:12px">📋</div><div style="font-size:14px">まだ履歴がありません</div><div style="font-size:12px;margin-top:8px">報告書を送信すると<br>ここに記録されます</div></div>`
+    :history.map(h=>`
+      <div class="history-card">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <span style="font-size:18px">${h.type==="complete"?"✅":"🔔"}</span>
+          <div style="flex:1">
+            <div style="font-weight:700;font-size:14px">${h.propertyName||"（物件名なし）"}</div>
+            <div style="font-size:11px;color:#888;margin-top:2px">${h.savedAt||""}</div>
+          </div>
+          <span style="background:${h.type==="complete"?"#D1FAE5":"#FEF3C7"};color:${h.type==="complete"?"#065F46":"#92400E"};font-size:11px;font-weight:700;border-radius:8px;padding:3px 10px">${h.type==="complete"?"完了報告":"開始報告"}</span>
+        </div>
+        <div style="font-size:12px;color:#666;display:flex;flex-wrap:wrap;gap:12px">
+          <span>📅 ${h.dateStart||"—"}</span>
+          <span>👤 ${(h.workers||[]).join("、")||"—"}</span>
+          ${h.overallJudge?`<span>📊 ${h.overallJudge}</span>`:""}
+        </div>
+        ${h.folderLink?`<a href="${h.folderLink}" target="_blank" style="display:inline-block;margin-top:8px;font-size:11px;color:#1B6CA8;font-weight:700">📁 写真フォルダを開く →</a>`:""}
+      </div>`).join("")}
+    ${history.length>0?`<button onclick="if(confirm('履歴をすべて削除しますか？')){localStorage.removeItem('${LS_HISTORY}');goPage('history');}" style="width:100%;padding:12px;border-radius:12px;border:1.5px solid #EF4444;background:none;color:#EF4444;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:8px">🗑️ 履歴をすべて削除</button>`:""}
+  </div>`;
+}
+
+// Global
+window.setForm=setForm;window.updateRoom=updateRoom;window.updateMadori=updateMadori;window.saveRoom=saveRoom;window.handlePhotos=handlePhotos;window.handleRoomPhoto=handleRoomPhoto;window.handleConfirmPhoto=handleConfirmPhoto;window.addExtraRoom=addExtraRoom;window.removeExtraRoom=removeExtraRoom;window.buildStartText=buildStartText;window.buildReportText=buildReportText;window.submitStartReport=submitStartReport;window.submitFullReport=submitFullReport;
+window.goPage=(p)=>{S.page=p;S.gasStatus=null;render();};
+window.goRoom=(id)=>{S.activeRoom=id;S.page="room";render();};
+window.toggleService=(s)=>{const cur=S.form.services;setForm({services:cur.includes(s)?cur.filter(x=>x!==s):[...cur,s]});};
+window.toggleMadoriEx=(ex)=>{const cur=S.form.madoriEx||[];setForm({madoriEx:cur.includes(ex)?cur.filter(x=>x!==ex):[...cur,ex]});};
+window.addWorker=()=>{const el=document.getElementById("newWorkerInput");if(!el||!el.value.trim())return;setForm({extraWorkers:[...(S.form.extraWorkers||[]),el.value.trim()]});};
+window.removeWorker=(i)=>{setForm({extraWorkers:(S.form.extraWorkers||[]).filter((_,j)=>j!==i)});};
+window.toggleCheck=(id,item)=>{const rd=getRoomData(id);updateRoom(id,{checks:rd.checks.includes(item)?rd.checks.filter(c=>c!==item):[...rd.checks,item]});};
+window.toggleCheckByIndex=(id,ci)=>{const room=getRoomInfo(id);const item=room.checks[ci];if(!item)return;const rd=getRoomData(id);updateRoom(id,{checks:rd.checks.includes(item)?rd.checks.filter(c=>c!==item):[...rd.checks,item]});};
+window.toggleAllChecks=(id)=>{const rd=getRoomData(id);const room=getRoomInfo(id);updateRoom(id,{checks:rd.checks.length===room.checks.length?[]:room.checks});};
+window.removeRoomPhoto=(id,type,i)=>{const rd=getRoomData(id);updateRoom(id,{[type]:rd[type].filter((_,j)=>j!==i)});};
+window.removeConfirmPhoto=(i)=>{const a=[...S.form.confirmPhotos];a[i]=null;setForm({confirmPhotos:a});};
+window.removeStartPhoto=(i)=>setForm({startReportPhotos:(S.form.startReportPhotos||[]).filter((_,j)=>j!==i)});
+window.copyText=(text)=>{navigator.clipboard.writeText(text).then(()=>showToast("✅ コピーしました！LINEに貼り付けてください","#10B981"));};
+window.sendStartEmail=()=>{const f=S.form;window.open(`mailto:${encodeURIComponent(f.clientEmail||"")}?subject=${encodeURIComponent(`【作業開始報告】${f.propertyName||"物件名未入力"}`)}&body=${encodeURIComponent(buildStartText())}`);setForm({startReportSent:true});};
+window.sendReportEmail=()=>{const f=S.form;if(!f.clientEmail){showToast("⚠️ クライアントメールを入力してください","#EF4444");return;}const dateStr=f.dateEnd?`${f.dateStart} ～ ${f.dateEnd}`:f.dateStart;window.open(`mailto:${encodeURIComponent(f.clientEmail)}?subject=${encodeURIComponent(`清掃報告書：${f.propertyName||"物件名未入力"} ${dateStr}`)}&body=${encodeURIComponent(buildReportText())}`);};
+window.clearAndReset=()=>{if(confirm("入力内容をリセットしますか？")){clearLS();S.form=initForm();render();}};
+render();
+</script>
+</body>
+</html>
